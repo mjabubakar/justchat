@@ -1,0 +1,15 @@
+PORT = 
+ACCESS_TOKEN_SECRET = 
+CONFIRMATION_TOKEN_SECRET = 
+EMAIL_CONFIRMATION_TOKEN_SECRET = 
+
+//sendgrid credentails
+EMAIL_ADDRESS = 
+API_KEY = 
+
+//database credentails
+NODE_ENV = development
+DB_HOST =
+DB_USERNAME = 
+DB_PASSWORD = 
+DB_NAME = 
