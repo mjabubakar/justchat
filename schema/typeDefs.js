@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server-express");
+const { gql } = require("apollo-server");
 
 const grouptypeDefs = require("./typeDefs/groupchat");
 const usertypeDefs = require("./typeDefs/user");
@@ -9,6 +9,8 @@ const typeDefs = gql`
     ${usertypeDefs.types}
 
     ${grouptypeDefs.types}
+
+    ${chatypeDefs.types}
 
     type Query {
         ${grouptypeDefs.queries}
@@ -27,6 +29,7 @@ const typeDefs = gql`
     type Subscription {
         messageSent(id: ID!): Message
         directMessageSent(id: ID!): Message
+        directMessages: Message
     }
 `;
 
