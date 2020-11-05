@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class DirectMessage extends Model {
     /**
@@ -13,21 +11,22 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       DirectMessage.belongsTo(models.User, { foreignKey: "sentBy" });
       DirectMessage.belongsTo(models.User, { foreignKey: "userId" });
-      DirectMessage.belongsTo(models.Conversation, { foreignKey: "conversationId" });
+      DirectMessage.belongsTo(models.Conversation, {
+        foreignKey: "conversationId",
+      });
     }
-  };
-  DirectMessage.init({
-    message: {
-      type: DataTypes.TEXT,
-      allowNull: false
+  }
+  DirectMessage.init(
+    {
+      message: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
     },
-    type: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false
+    {
+      sequelize,
+      modelName: "DirectMessage",
     }
-  }, {
-    sequelize,
-    modelName: 'DirectMessage',
-  });
+  );
   return DirectMessage;
 };

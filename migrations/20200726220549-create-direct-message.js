@@ -1,46 +1,42 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('DirectMessages', {
+    await queryInterface.createTable("DirectMessages", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       message: {
         type: Sequelize.TEXT,
-        allowNull: false
-      },
-      type: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       userId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
-        references: { model: "Users", key: "id" }
+        references: { model: "Users", key: "id" },
       },
       sentBy: {
         type: Sequelize.INTEGER,
-        references: { model: "Users", key: "id" }
+        references: { model: "Users", key: "id" },
       },
       conversationId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
-        references: { model: "Conversations", key: "id" }
-      }
+        references: { model: "Conversations", key: "id" },
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('DirectMessages');
-  }
+    await queryInterface.dropTable("DirectMessages");
+  },
 };
