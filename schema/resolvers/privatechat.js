@@ -83,7 +83,6 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   const messages = [
     {
       message,
-      type: false,
       userId: user.id,
       conversationId: id,
       sentBy: user.id,
@@ -93,7 +92,6 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   if (friend) {
     messages.push({
       message,
-      type: false,
       userId: friend.userId,
       conversationId: id,
       sentBy: user.id,
@@ -105,6 +103,8 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       },
       { where: { friendId: friend.id } }
     );
+  } else {
+    errorHandler.notFound("Friend");
   }
 
   await Friend.update(
@@ -143,7 +143,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
 
   const { type } = newMessage[0];
 
-  return { message, type, sentBy: username, time };
+  return { message, sentBy: username, time };
 };
 
 exports.friends = async function (_, __, context) {
@@ -300,10 +300,10 @@ exports.directMessages = async function (_, { id }, context) {
   const allMessages = [];
 
   for (i in messages) {
-    const { type, createdAt, sentBy, message } = messages[i];
+    const { createdAt, sentBy, message } = messages[i];
     const { username } = await User.findByPk(sentBy);
-    const time = (createdAt);
-    allMessages.push({ type, message, sentBy: username, time });
+    const time = createdAt;
+    allMessages.push({ message, sentBy: username, time });
   }
 
   return allMessages;

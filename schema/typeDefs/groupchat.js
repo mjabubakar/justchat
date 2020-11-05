@@ -16,7 +16,6 @@ exports.mutations = `
 
 exports.types = `
     type Message {
-        type: Boolean!
         message: String!
         time: String!
         sentBy: String!

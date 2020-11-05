@@ -23,14 +23,18 @@ const onConnect = async (connectionParams, _) => {
   }
 };
 const onDisconnect = async (_, context) => {
-  const init = await context.initPromise;
-  const { username } = init;
-  await User.update(
-    {
-      online: false,
-    },
-    { where: { username } }
-  );
+  try {
+    const init = await context.initPromise;
+    const { username } = init;
+    await User.update(
+      {
+        online: false,
+      },
+      { where: { username } }
+    );
+  } catch (e) {
+    return "Not connected.";
+  }
 };
 
 module.exports = {
