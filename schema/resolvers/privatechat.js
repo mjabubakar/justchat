@@ -1,143 +1,310 @@
 const errorHandler = require("../../ErrorHandler");
-const { User, Conversation, DirectMessage, Friend } = require("../../models");
+const {
+  User,
+  Conversation,
+  DirectMessage,
+  Friend,
+  Count,
+} = require("../../models");
 const functions = require("../../functions");
 
-exports.friends = async function (_, __, context) {
+const { pubsub } = require("./pubsub");
 
-    if (!context.username) {
-        errorHandler.authenticationError();
-    };
+const ALL_MESSAGES = "ALL_MESSAGES";
 
-    const user = await User.findOne({ where: { username: context.username } });
+const PRIVATE_MESSAGE_SENT = "PRIVATE_MESSAGE_SENT";
 
-    if (!user) {
-        errorHandler.notFound("User");
-    }
+exports.setCount = async function (_, { id }, context) {
+  if (!context.username) {
+    errorHandler.authenticationError();
+  }
 
-    const friends = await Friend.findAll({
-        where: { userId: user.id }
+  const user = await User.findOne({
+    where: { username: context.username },
+  });
+
+  if (!user) {
+    errorHandler.notFound("User");
+  }
+
+  const conversation = await Conversation.findByPk(id);
+
+  if (!conversation) {
+    errorHandler.notFound("Conversation");
+  }
+
+  const friend = await Friend.findOne({
+    where: {
+      conversationId: conversation.id,
+      userId: user.id,
+    },
+  });
+
+  if (!friend) {
+    errorHandler.notFound("Friend");
+  }
+
+  await Count.update(
+    {
+      count: 0,
+    },
+    { where: { friendId: friend.id } }
+  );
+
+  return "Updated";
+};
+
+exports.sendDirectMessage = async function (_, { id, message }, context) {
+  if (!context.username) {
+    errorHandler.authenticationError();
+  }
+
+  const user = await User.findOne({
+    where: { username: context.username },
+  });
+
+  if (!user) {
+    errorHandler.notFound("User");
+  }
+
+  const conversation = await Conversation.findByPk(id);
+
+  if (!conversation) {
+    errorHandler.notFound("Conversation");
+  }
+
+  const friend = await Friend.findOne({
+    where: {
+      conversationId: conversation.id,
+      userId: conversation.chatId - user.id,
+    },
+  });
+
+  const messages = [
+    {
+      message,
+      type: false,
+      userId: user.id,
+      conversationId: id,
+      sentBy: user.id,
+    },
+  ];
+
+  if (friend) {
+    messages.push({
+      message,
+      type: false,
+      userId: friend.userId,
+      conversationId: id,
+      sentBy: user.id,
     });
+    const count = await Count.findOne({ where: { friendId: friend.id } });
+    await Count.update(
+      {
+        count: count.count + 1,
+      },
+      { where: { friendId: friend.id } }
+    );
+  }
 
-    const allFriends = [];
+  await Friend.update(
+    {
+      lastmessage: message,
+    },
+    { where: { conversationId: id } }
+  );
 
-    for (friend of friends) {
-        const user = await User.findOne({
-            where: { id: friend.friendId },
-            attributes: ["fullname", "username", "profilepic"]
-        });
-        allFriends.push(user);
-    }
+  const newMessage = await DirectMessage.bulkCreate(messages);
 
-    return allFriends;
-}
+  const time = functions.convertToTime(newMessage[0].createdAt);
+
+  const { username } = await User.findByPk(newMessage[0].sentBy);
+
+  await pubsub.publish(PRIVATE_MESSAGE_SENT, {
+    directMessageSent: {
+      time,
+      message,
+      id,
+      type: false,
+      sentBy: username,
+    },
+  });
+  const friendUsername = await User.findByPk(friend.userId);
+
+  await pubsub.publish(ALL_MESSAGES, {
+    directMessages: {
+      time,
+      message,
+      to: friendUsername.username,
+      type: false,
+      sentBy: username,
+    },
+  });
+
+  const { type } = newMessage[0];
+
+  return { message, type, sentBy: username, time };
+};
+
+exports.friends = async function (_, __, context) {
+  if (!context.username) {
+    errorHandler.authenticationError();
+  }
+
+  const user = await User.findOne({ where: { username: context.username } });
+
+  if (!user) {
+    errorHandler.notFound("User");
+  }
+
+  const friends = await Friend.findAll({
+    where: { userId: user.id },
+    order: [["updatedAt", "DESC"]],
+  });
+
+  const allFriends = [];
+
+  for (friend of friends) {
+    const user = await User.findOne({
+      where: { id: friend.friendId },
+      attributes: ["updatedAt", "username", "profilepic", "online"],
+    });
+    const count = await Count.findOne({ where: { friendId: friend.id } });
+    const data = user;
+    data.online = user.online ? "Online" : functions.lastSeen(user.updatedAt);
+    data.conversationId = friend.conversationId;
+    data.lastmessage = friend.lastmessage;
+    data.count = count.count;
+    data.lastmsgTime = friend.lastmessage
+      ? functions.lastmsgTime(friend.updatedAt)
+      : "";
+    allFriends.push(data);
+  }
+
+  return allFriends;
+};
 
 exports.startConversation = async function (_, { username }, context) {
+  if (!context.username) {
+    errorHandler.authenticationError();
+  }
 
-    if (!context.username) {
-        errorHandler.authenticationError();
-    };
+  const user = await User.findOne({ where: { username: context.username } });
 
-    const user = await User.findOne({ where: { username: context.username } });
+  if (!user) {
+    errorHandler.notFound("User");
+  }
 
-    if (!user) {
-        errorHandler.notFound("User");
-    }
+  const friend = await User.findOne({ where: { username } });
 
-    const friend = await User.findOne({ where: { username } });
+  if (username == context.username || !friend) {
+    errorHandler.notFound("Friend");
+  }
 
-    if (!friend) {
-        errorHandler.notFound("Friend");
-    }
+  const chatId = user.id + friend.id;
 
-    const chatId = user.id + friend.id;
+  const conversation = await Conversation.findOne({ where: { chatId } });
 
-    const conversation = await Conversation.findOne({ where: { chatId } });
+  if (conversation) {
+    return conversation.id;
+  }
 
-    if (conversation) {
-        const error = new Error("Conversation already exist");
-        error.code = 409;
-        throw error;
-    }
+  const newConversation = await Conversation.create({
+    chatId,
+  });
 
-    const newConversation = await Conversation.create({
-        chatId
-    });
+  const friends = [
+    {
+      friendId: friend.id,
+      userId: user.id,
+      conversationId: newConversation.id,
+    },
+    {
+      friendId: user.id,
+      userId: friend.id,
+      conversationId: newConversation.id,
+    },
+  ];
 
-    const friends = [{ friendId: friend.id, userId: user.id, conversationId: newConversation.id },
-    { friendId: user.id, userId: friend.id, conversationId: newConversation.id }];
+  const newFriends = await Friend.bulkCreate(friends);
 
-    await Friend.bulkCreate(friends);
+  await Count.bulkCreate([
+    {
+      count: 0,
+      friendId: newFriends[0].id,
+    },
+    {
+      count: 0,
+      friendId: newFriends[1].id,
+    },
+  ]);
 
-    return "Conversation started successfully"
-
-}
+  return newConversation.id;
+};
 
 exports.deleteChat = async function (_, { id }, context) {
+  if (!context.username) {
+    errorHandler.authenticationError();
+  }
 
-    if (!context.username) {
-        errorHandler.authenticationError();
-    };
+  const user = await User.findOne({ where: { username: context.username } });
 
-    const user = await User.findOne({ where: { username: context.username } });
+  if (!user) {
+    errorHandler.notFound("User");
+  }
 
-    if (!user) {
-        errorHandler.notFound("User");
-    }
+  const conversation = await Conversation.findByPk(id);
 
-    const conversation = await Conversation.findByPk(id);
+  if (!conversation) {
+    errorHandler.notFound("Conversation");
+  }
 
-    if (!conversation) {
-        errorHandler.notFound("Conversation");
-    }
+  await DirectMessage.destroy({
+    where: {
+      conversationId: id,
+      userId: user.id,
+    },
+  });
 
-    await DirectMessage.destroy({
-        where: {
-            conversationId: id,
-            userId: user.id
-        }
-    });
-
-    return "Deleted chat successfully";
-}
+  return "Deleted chat successfully";
+};
 
 exports.directMessages = async function (_, { id }, context) {
+  if (!context.username) {
+    errorHandler.authenticationError();
+  }
 
-    if (!context.username) {
-        errorHandler.authenticationError();
-    };
+  const user = await User.findOne({ where: { username: context.username } });
 
-    const user = await User.findOne({ where: { username: context.username } });
+  if (!user) {
+    errorHandler.notFound("User");
+  }
 
-    if (!user) {
-        errorHandler.notFound("User");
-    }
+  const conversation = await Conversation.findByPk(id);
 
-    const conversation = await Conversation.findByPk(id);
+  if (!conversation) {
+    errorHandler.notFound("Conversation");
+  }
 
-    if (!conversation) {
-        errorHandler.notFound("Conversation");
-    }
+  const messages = await DirectMessage.findAll({
+    where: {
+      userId: user.id,
+      conversationId: id,
+    },
+  });
 
-    const messages = await DirectMessage.findAll({
-        where: {
-            userId: user.id,
-            conversationId: id
-        }
-    });
+  if (!messages) {
+    errorHandler.notFound("Messages");
+  }
 
-    if (!messages) {
-        errorHandler.notFound("Messages")
-    }
+  const allMessages = [];
 
-    const allMessages = [];
+  for (i in messages) {
+    const { type, createdAt, sentBy, message } = messages[i];
+    const { username } = await User.findByPk(sentBy);
+    const time = (createdAt);
+    allMessages.push({ type, message, sentBy: username, time });
+  }
 
-    for (msg of messages) {
-        const { type, createdAt, sentBy, message } = msg;
-        const { username } = await User.findByPk(sentBy);
-        const time = functions.convertToTime(createdAt);
-        allMessages.push({ type, message, sentBy: username, time });
-    }
-
-    return allMessages;
-}
-
+  return allMessages;
+};
