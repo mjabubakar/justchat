@@ -81,7 +81,7 @@ exports.nodemailer = (confirmationToken, email) => {
     })
   );
 
-  const url = `http://localhost:${process.env.PORT}/confirmation/${confirmationToken}`;
+  const url = `${process.env.FRONT_END_URL}/confirmation/${confirmationToken}`;
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS, //env
     to: email,
@@ -106,7 +106,7 @@ exports.forgotPassword = (confirmationToken, email) => {
     })
   );
 
-  const url = `http://localhost:${process.env.PORT}/confirmation/${confirmationToken}`;
+  const url = `${process.env.FRONT_END_URL}/confirmation/${confirmationToken}`;
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS,
     to: email,

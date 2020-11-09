@@ -5,13 +5,13 @@ exports.queries = `
 `;
 
 exports.mutations = `
-    createGroup(name: String!, profilepic: String, members: [addMembers!]): String
+    createGroup(name: String!, members: [addMembers!]): String
     leaveGroup(groupId: ID!): String
     removeMember(groupId: ID!, username: String!): String
     updateType(groupId: ID!, username: String!): String
     sendMessage(id: ID!, message: String!): Message!
     addMember(groupId: ID!, username: String!): String
-    changeGProfilePic(groupId: ID!, file: String!): String
+    changeGProfilePic(groupId: ID!, file: Upload!): String
 `;
 
 exports.types = `

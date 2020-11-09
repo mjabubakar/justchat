@@ -5,25 +5,13 @@ const functions = require("../../functions");
 const data = require("../../data");
 const jwt = require("jsonwebtoken");
 const errorHandler = require("../../ErrorHandler");
-const path = require("path");
-const { Storage } = require("@google-cloud/storage");
 const Op = require("sequelize").Op;
-
-const gc = new Storage({
-  keyFilename: path.join(__dirname, process.env.GCLOUD_APPLICATION_CREDENTIALS),
-  projectId: process.env.GCLOUD_PROJECT_ID,
-});
-
-const bucket = gc.bucket(process.env.GCLOUD_STORAGE_BUCKET_URL);
-
-const bc = process.env.GCLOUD_STORAGE_BUCKET_URL;
-
-const bcLink = bc.split("gs://")[1];
+const { bcLink, bucket } = require("../../gcloud");
 
 const name = new Date().getTime().toString();
 
 exports.createUser = async function (_, { userInput }) {
-  const { email, password, username, fullname, profilepic } = userInput;
+  const { email, password, username, fullname, profilepic, bio } = userInput;
   const errors = [];
 
   if (!validator.isEmail(email)) {
@@ -71,7 +59,9 @@ exports.createUser = async function (_, { userInput }) {
   const usernameExist = await User.findOne({ where: { username } });
 
   if (userExist || usernameExist) {
-    const error = new Error("User exist already!");
+    const error = new Error(
+      `${userExist ? "Email" : "Username"} taken already!`
+    );
     error.code = 409;
     throw error;
   }
@@ -103,6 +93,7 @@ exports.createUser = async function (_, { userInput }) {
     verified: false,
     profilepic: `https://storage.googleapis.com/${bcLink}${username}/${name}`,
     online: false,
+    bio,
   });
 
   const createdUser = await user.save();
@@ -115,6 +106,7 @@ exports.createUser = async function (_, { userInput }) {
     username: createdUser.username,
     fullname: createdUser.fullname,
     message: "Check your inbox for the confirmation link.",
+    bio: createdUser.bio,
   };
 };
 
@@ -383,11 +375,12 @@ exports.changeProfilePic = async (_, { image }, context) => {
   }
 
   const { createReadStream } = await image;
+
   try {
     await new Promise((res) =>
       createReadStream()
         .pipe(
-          bucket.file(`${username}/${name}`).createWriteStream({
+          bucket.file(`${context.username}/${name}`).createWriteStream({
             resumable: false,
             gzip: true,
           })

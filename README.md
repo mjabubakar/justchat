@@ -43,3 +43,4 @@ Start server from your root folder using `npm start`
 - `GCLOUD_PROJECT_ID` Google cloud project id
 - `GCLOUD_APPLICATION_CREDENTIALS` key.json path
 - `GCLOUD_STORAGE_BUCKET_URL` Storage bucket url
+- `FRONT_END_URL` Website URL that will be used for email confirmation
