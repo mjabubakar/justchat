@@ -30,7 +30,7 @@ const server = new ApolloServer({
 });
 
 var corsOptions = {
-  origin: "https://whatsappweb-7a129.web.app/",
+  origin: "https://whatsappweb-7a129.web.app",
   optionsSuccessStatus: 200,
 };
 
