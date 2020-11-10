@@ -26,7 +26,7 @@ var _require2 = require("./subscription"),
     onDisconnect = _require2.onDisconnect;
 
 var corsOptions = {
-  origin: "https://whatsappweb-7a129.web.app",
+  origin: "https://whatsappweb-7a129.web.app/graphql",
   optionsSuccessStatus: 200
 };
 app.use(function (_, res, next) {
