@@ -34,7 +34,7 @@ var corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 server.applyMiddleware({ app });
 
 const httpServer = http.createServer(app);
