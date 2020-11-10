@@ -1,5 +1,6 @@
 const { ApolloServer } = require("apollo-server-express");
-const app = require("express")();
+const express = require("express");
+const app = express();
 const cors = require("cors");
 const http = require("http");
 require("dotenv/config");
@@ -9,6 +10,14 @@ const context = require("./context");
 const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
+
+const corsOptions = {
+  origin: "https://whatsappweb-7a129.web.app",
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+
 const server = new ApolloServer({
   context,
   typeDefs,
@@ -29,12 +38,6 @@ const server = new ApolloServer({
   },
 });
 
-var corsOptions = {
-  origin: "https://whatsappweb-7a129.web.app",
-  optionsSuccessStatus: 200,
-};
-
-app.use(cors());
 server.applyMiddleware({ app });
 
 const httpServer = http.createServer(app);

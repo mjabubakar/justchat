@@ -3,7 +3,9 @@
 var _require = require("apollo-server-express"),
     ApolloServer = _require.ApolloServer;
 
-var app = require("express")();
+var express = require("express");
+
+var app = express();
 
 var cors = require("cors");
 
@@ -23,6 +25,11 @@ var _require2 = require("./subscription"),
     onConnect = _require2.onConnect,
     onDisconnect = _require2.onDisconnect;
 
+var corsOptions = {
+  origin: "https://whatsappweb-7a129.web.app",
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
@@ -46,11 +53,6 @@ var server = new ApolloServer({
     };
   }
 });
-var corsOptions = {
-  origin: "https://whatsappweb-7a129.web.app",
-  optionsSuccessStatus: 200
-};
-app.use(cors());
 server.applyMiddleware({
   app: app
 });
