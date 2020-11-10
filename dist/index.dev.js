@@ -32,10 +32,10 @@ var corsOptions = {
 app.use(function (_, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
-app.use(cors());
+app.use(cors(corsOptions));
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
@@ -60,7 +60,8 @@ var server = new ApolloServer({
   }
 });
 server.applyMiddleware({
-  app: app
+  app: app,
+  cors: false
 });
 var httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
