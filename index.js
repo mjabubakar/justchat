@@ -29,12 +29,12 @@ const server = new ApolloServer({
   },
 });
 
-app.use((_, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+var corsOptions = {
+  origin: "https://whatsappweb-7a129.web.app/",
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 server.applyMiddleware({ app });
 
 const httpServer = http.createServer(app);
