@@ -1,5 +1,7 @@
-const { ApolloServer } = require("apollo-server");
-
+const { ApolloServer } = require("apollo-server-express");
+const app = require("express")();
+const cors = require("cors");
+const http = require("http");
 require("dotenv/config");
 
 const port = process.env.PORT || 3000;
@@ -7,7 +9,7 @@ const context = require("./context");
 const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
-const apolloServer = new ApolloServer({
+const server = new ApolloServer({
   context,
   typeDefs,
   resolvers,
@@ -27,8 +29,20 @@ const apolloServer = new ApolloServer({
   },
 });
 
-apolloServer.listen({ port }, () => {
+var corsOptions = {
+  origin: "https://whatsappweb-7a129.web.app/",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+server.applyMiddleware({ app });
+
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
+
+httpServer.listen({ port }, () => {
   console.log(
-    `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
   );
 });
