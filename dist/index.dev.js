@@ -26,13 +26,13 @@ var _require2 = require("./subscription"),
     onDisconnect = _require2.onDisconnect;
 
 var corsOptions = {
-  origin: "https://whatsappweb-7a129.web.app/graphql",
+  origin: "https://whatsappweb-api.herokuapp.com/",
   optionsSuccessStatus: 200
 };
 app.use(function (_, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
   next();
 });
 app.use(cors());
