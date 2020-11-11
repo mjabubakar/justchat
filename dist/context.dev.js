@@ -1,6 +1,6 @@
 "use strict";
 
-var _require = require("apollo-server-express"),
+var _require = require("apollo-server"),
     AuthenticationError = _require.AuthenticationError;
 
 var jwt = require("jsonwebtoken");

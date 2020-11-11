@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server-express");
+const { gql } = require("apollo-server");
 
 const grouptypeDefs = require("./typeDefs/groupchat");
 const usertypeDefs = require("./typeDefs/user");

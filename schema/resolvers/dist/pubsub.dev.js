@@ -1,6 +1,6 @@
 "use strict";
 
-var _require = require("apollo-server-express"),
+var _require = require("apollo-server"),
     PubSub = _require.PubSub,
     withFilter = _require.withFilter;
 
