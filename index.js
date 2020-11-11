@@ -17,11 +17,6 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-app.use(express.static(path.join(__dirname, "/whatsapp-web-clone/public")));
-app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "../whatsapp-web-clone/build/index.html"));
-});
-
 const server = new ApolloServer({
   context,
   typeDefs,

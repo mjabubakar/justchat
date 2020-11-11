@@ -31,10 +31,6 @@ var corsOptions = {
   origin: "https://whatsappweb-api.herokuapp.com/",
   optionsSuccessStatus: 200
 };
-app.use(express["static"](path.join(__dirname, "/whatsapp-web-clone/public")));
-app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "../whatsapp-web-clone/build/index.html"));
-});
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
