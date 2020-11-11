@@ -5,11 +5,15 @@ var _require = require("apollo-server-express"),
 
 var express = require("express");
 
+var app = express();
+
 var cors = require("cors");
 
 var http = require("http");
 
 require("dotenv/config");
+
+var path = require("path");
 
 var port = process.env.PORT || 3000;
 
@@ -23,6 +27,19 @@ var _require2 = require("./subscription"),
     onConnect = _require2.onConnect,
     onDisconnect = _require2.onDisconnect;
 
+var corsOptions = {
+  origin: "https://whatsappweb-api.herokuapp.com/",
+  optionsSuccessStatus: 200
+};
+app.use(function (_, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+  next();
+});
+app.get("*", function (_, res) {
+  res.sendFile(path.resolve(__dirname, "public", "index.html"));
+});
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
@@ -46,25 +63,9 @@ var server = new ApolloServer({
     };
   }
 });
-var app = express();
-
-var allowCrossDomain = function allowCrossDomain(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Credentials", true);
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With"); // intercept OPTIONS method
-
-  if ("OPTIONS" == req.method) {
-    res.send(200);
-  } else {
-    next();
-  }
-};
-
-app.use(allowCrossDomain);
-app.use(cors());
 server.applyMiddleware({
-  app: app
+  app: app,
+  cors: false
 });
 var httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
