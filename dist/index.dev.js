@@ -1,19 +1,9 @@
 "use strict";
 
-var _require = require("apollo-server-express"),
+var _require = require("apollo-server"),
     ApolloServer = _require.ApolloServer;
 
-var express = require("express");
-
-var app = express();
-
-var cors = require("cors");
-
-var http = require("http");
-
 require("dotenv/config");
-
-var path = require("path");
 
 var port = process.env.PORT || 3000;
 
@@ -27,20 +17,7 @@ var _require2 = require("./subscription"),
     onConnect = _require2.onConnect,
     onDisconnect = _require2.onDisconnect;
 
-var corsOptions = {
-  origin: "https://whatsappweb-api.herokuapp.com/",
-  optionsSuccessStatus: 200
-};
-app.use(function (_, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-  next();
-});
-app.get("*", function (_, res) {
-  res.sendFile(path.resolve(__dirname, "public", "index.html"));
-});
-var server = new ApolloServer({
+var apolloServer = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
   resolvers: resolvers,
@@ -63,14 +40,8 @@ var server = new ApolloServer({
     };
   }
 });
-server.applyMiddleware({
-  app: app,
-  cors: false
-});
-var httpServer = http.createServer(app);
-server.installSubscriptionHandlers(httpServer);
-httpServer.listen({
+apolloServer.listen({
   port: port
 }, function () {
-  console.log("\uD83D\uDE80 Server ready at http://localhost:".concat(port).concat(server.graphqlPath));
+  console.log("\uD83D\uDE80 Server ready at http://localhost:".concat(port).concat(apolloServer.graphqlPath));
 });
