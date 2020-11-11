@@ -8,10 +8,7 @@ const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
 const apolloServer = new ApolloServer({
-  cors: {
-    credentials: true,
-    origin: "*",
-  },
+  cors: false,
   context,
   typeDefs,
   resolvers,
