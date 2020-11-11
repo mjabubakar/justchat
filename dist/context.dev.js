@@ -5,9 +5,6 @@ var _require = require("apollo-server-express"),
 
 var jwt = require("jsonwebtoken");
 
-var _require2 = require("./models"),
-    User = _require2.User;
-
 module.exports = function _callee(_ref) {
   var req, connection, auth, username, token, getToken;
   return regeneratorRuntime.async(function _callee$(_context) {

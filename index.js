@@ -16,15 +16,15 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-app.use((_, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
-  );
-  next();
-});
+// app.use((_, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+//   );
+//   next();
+// });
 
 app.use(cors({ corsOptions }));
 
