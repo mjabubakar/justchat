@@ -11,8 +11,6 @@ var cors = require("cors");
 
 var http = require("http");
 
-var path = require("path");
-
 require("dotenv/config");
 
 var port = process.env.PORT || 3000;
@@ -54,7 +52,7 @@ var server = new ApolloServer({
     };
   }
 });
-app.use(cors());
+app.use(cors(corsOptions));
 server.applyMiddleware({
   app: app,
   cors: false

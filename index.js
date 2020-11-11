@@ -3,7 +3,6 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const http = require("http");
-const path = require("path");
 require("dotenv/config");
 
 const port = process.env.PORT || 3000;
@@ -37,7 +36,7 @@ const server = new ApolloServer({
   },
 });
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 server.applyMiddleware({ app, cors: false });
 
