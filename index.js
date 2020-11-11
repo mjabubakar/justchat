@@ -12,7 +12,7 @@ const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
 
 const corsOptions = {
-  origin: "https://whatsappweb-api.herokuapp.com/",
+  origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200,
 };
 

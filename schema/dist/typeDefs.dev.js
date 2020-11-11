@@ -12,7 +12,7 @@ function _templateObject() {
 
 function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-var _require = require("apollo-server"),
+var _require = require("apollo-server-express"),
     gql = _require.gql;
 
 var grouptypeDefs = require("./typeDefs/groupchat");

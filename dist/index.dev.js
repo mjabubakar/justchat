@@ -26,7 +26,7 @@ var _require2 = require("./subscription"),
     onDisconnect = _require2.onDisconnect;
 
 var corsOptions = {
-  origin: "https://whatsappweb-api.herokuapp.com/",
+  origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200
 };
 app.use(function (_, res, next) {
