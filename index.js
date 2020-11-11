@@ -1,5 +1,9 @@
-const { ApolloServer } = require("apollo-server");
-
+const { ApolloServer } = require("apollo-server-express");
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const http = require("http");
+const path = require("path");
 require("dotenv/config");
 
 const port = process.env.PORT || 3000;
@@ -7,7 +11,18 @@ const context = require("./context");
 const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
-const apolloServer = new ApolloServer({
+
+const corsOptions = {
+  origin: "https://whatsappweb-api.herokuapp.com/",
+  optionsSuccessStatus: 200,
+};
+
+app.use(express.static(path.join(__dirname, "/whatsapp-web-clone/public")));
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "../whatsapp-web-clone/build/index.html"));
+});
+
+const server = new ApolloServer({
   context,
   typeDefs,
   resolvers,
@@ -27,8 +42,13 @@ const apolloServer = new ApolloServer({
   },
 });
 
-apolloServer.listen({ port }, () => {
+server.applyMiddleware({ app, cors: false });
+
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
+
+httpServer.listen({ port }, () => {
   console.log(
-    `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
   );
 });
