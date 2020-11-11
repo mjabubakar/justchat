@@ -35,7 +35,7 @@ const server = new ApolloServer({
   context,
   typeDefs,
   resolvers,
-  subscriptions: {
+  subscriptions: { 
     onConnect,
     onDisconnect,
   },
