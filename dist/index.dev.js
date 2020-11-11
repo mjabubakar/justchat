@@ -5,6 +5,8 @@ var _require = require("apollo-server-express"),
 
 var express = require("express");
 
+var cors = require("cors");
+
 var http = require("http");
 
 require("dotenv/config");
@@ -59,6 +61,7 @@ var allowCrossDomain = function allowCrossDomain(req, res, next) {
 };
 
 app.use(allowCrossDomain);
+app.use(cors());
 server.applyMiddleware({
   app: app
 });
