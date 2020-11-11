@@ -37,6 +37,8 @@ const server = new ApolloServer({
   },
 });
 
+app.use(cors());
+
 server.applyMiddleware({ app, cors: false });
 
 const httpServer = http.createServer(app);

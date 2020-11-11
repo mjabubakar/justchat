@@ -54,6 +54,7 @@ var server = new ApolloServer({
     };
   }
 });
+app.use(cors());
 server.applyMiddleware({
   app: app,
   cors: false
