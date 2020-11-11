@@ -18,6 +18,10 @@ var _require2 = require("./subscription"),
     onDisconnect = _require2.onDisconnect;
 
 var apolloServer = new ApolloServer({
+  cors: {
+    credentials: true,
+    origin: "*"
+  },
   context: context,
   typeDefs: typeDefs,
   resolvers: resolvers,
