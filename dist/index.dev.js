@@ -61,7 +61,9 @@ var server = new ApolloServer({
 });
 server.applyMiddleware({
   app: app,
-  cors: false
+  cors: {
+    origin: "*"
+  }
 });
 var httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
