@@ -67,52 +67,23 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     errorHandler.notFound("User");
   }
 
-  const conversation = await Conversation.findByPk(id);
-
-  if (!conversation) {
-    errorHandler.notFound("Conversation");
-  }
-
-  const friend = await Friend.findOne({
-    where: {
-      conversationId: conversation.id,
-      userId: user.id,
-    },
-  });
-
-  if (!friend) {
-    errorHandler.notFound("Friend");
-  }
-
-  await Count.update(
-    {
-      count: 0,
-    },
-    { where: { friendId: friend.id } }
-  );
-
-  return "Updated";
-};
-
-exports.sendDirectMessage = async function (_, { id, message }, context) {
-  if (!context.username) {
-    errorHandler.authenticationError();
-  }
-
-  const user = await User.findOne({
-    where: { username: context.username },
-  });
-
-  if (!user) {
-    errorHandler.notFound("User");
-  }
-
   const conversation = await Conversation.findOne({
     where: { id },
   });
 
   if (!conversation) {
     errorHandler.notFound("Conversation");
+  }
+
+  const me = await Friend.findOne({
+    where: {
+      conversationId: conversation.id,
+      friendId: user.id,
+    },
+  });
+
+  if (!me) {
+    errorHandler.notFound("Friend");
   }
 
   const friend = await Friend.findOne({
@@ -124,35 +95,29 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
 
   const messageCount1 = await DirectMessage.findAndCountAll({
     where: { conversationId: id, userId: user.id },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
   });
 
   const messageCount2 = await DirectMessage.findAndCountAll({
-    where: { conversationId: id, userId: friend.id },
-  });
-
-  const lastmessage1 = await DirectMessage.findAll({
-    where: { conversationId: id, userId: user.id },
+    where: { conversationId: id, userId: friend.userId },
     limit: 1,
     order: [["createdAt", "DESC"]],
   });
+  const lastmessage1 = messageCount1.rows;
 
-  const lastmessage2 = await DirectMessage.findAll({
-    where: { conversationId: id, userId: friend.id },
-    limit: 1,
-    order: [["createdAt", "DESC"]],
-  });
+  const lastmessage2 = messageCount2.rows;
 
   const messages = [];
   const m1 = {
     message: "official",
     userId: user.id,
     conversationId: id,
-
     sentBy: user.id,
   };
   if (
     messageCount1.count === 0 ||
-    functions.isToday(lastmessage1[0].createdAt)
+    functions.isToday(lastmessage[0].createdAt)
   ) {
     messages.push(m1);
   }
@@ -162,16 +127,48 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     conversationId: id,
     sentBy: user.id,
   });
-  const m2 = {
+
+  if (!me) {
+    errorHandler.notFound("Friend");
+  }
+
+  const friend = await Friend.findOne({
+    where: {
+      conversationId: conversation.id,
+      userId: conversation.chatId - user.id,
+    },
+  });
+
+  const messages = [];
+  const m1 = {
     message: "official",
-    userId: friend.userId,
+    userId: user.id,
     conversationId: id,
     sentBy: user.id,
   };
+  if (
+    messageCount1.count === 0 ||
+    functions.isToday(lastmessage[0].createdAt)
+  ) {
+    messages.push(m1);
+  }
+  messages.push({
+    message,
+    userId: user.id,
+    conversationId: id,
+    sentBy: user.id,
+  });
+
   if (friend) {
+    const m2 = {
+      message: "official",
+      userId: friend.userId,
+      conversationId: id,
+      sentBy: user.id,
+    };
     if (
       messageCount2.count === 0 ||
-      functions.isToday(lastmessage2[0].createdAt)
+      functions.isToday(lastmessage1[0].createdAt)
     ) {
       messages.push(m2);
     }
@@ -188,8 +185,6 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       },
       { where: { friendId: friend.id } }
     );
-  } else {
-    errorHandler.notFound("Friend");
   }
 
   await Friend.update(
