@@ -67,10 +67,23 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     errorHandler.notFound("User");
   }
 
-  const conversation = await Conversation.findByPk(id);
+  const conversation = await Conversation.findOne({
+    where: { id },
+  });
 
   if (!conversation) {
     errorHandler.notFound("Conversation");
+  }
+
+  const me = await Friend.findOne({
+    where: {
+      conversationId: conversation.id,
+      userId: user.id,
+    },
+  });
+
+  if (!me) {
+    errorHandler.notFound("Friend");
   }
 
   const friend = await Friend.findOne({
@@ -80,16 +93,106 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     },
   });
 
-  const messages = [
-    {
-      message,
-      userId: user.id,
+  const messageCount1 = await DirectMessage.findAndCountAll({
+    where: { conversationId: id, userId: user.id },
+<<<<<<< HEAD
+    limit: 1,
+    order: [["createdAt", "DESC"]],
+  });
+
+  const messageCount2 = await DirectMessage.findAndCountAll({
+    where: { conversationId: id, userId: friend.userId },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
+  });
+  const lastmessage = messageCount1.rows;
+
+  const lastmessage1 = messageCount2.rows;
+
+  const messages = [];
+  const m1 = {
+    message: "official",
+    userId: user.id,
+    conversationId: id,
+    sentBy: user.id,
+  };
+  if (
+    messageCount1.count === 0 ||
+    functions.isToday(lastmessage[0].createdAt)
+  ) {
+    messages.push(m1);
+  }
+  messages.push({
+    message,
+    userId: user.id,
+    conversationId: id,
+    sentBy: user.id,
+=======
+>>>>>>> eabfdb2f9307bd7f372829c20ba35c130ad55c8e
+  });
+
+  const messageCount2 = await DirectMessage.findAndCountAll({
+    where: { conversationId: id, userId: friend.id },
+  });
+
+  const lastmessage1 = await DirectMessage.findAll({
+    where: { conversationId: id, userId: user.id },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
+  });
+
+  const lastmessage2 = await DirectMessage.findAll({
+    where: { conversationId: id, userId: friend.id },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
+  });
+
+  const messages = [];
+  const m1 = {
+    message: "official",
+    userId: user.id,
+    conversationId: id,
+
+    sentBy: user.id,
+  };
+  if (
+    messageCount1.count === 0 ||
+    functions.isToday(lastmessage1[0].createdAt)
+  ) {
+    messages.push(m1);
+  }
+  messages.push({
+    message,
+    userId: user.id,
+    conversationId: id,
+    sentBy: user.id,
+  });
+  const m2 = {
+    message: "official",
+    userId: friend.userId,
+    conversationId: id,
+    sentBy: user.id,
+  };
+  if (friend) {
+<<<<<<< HEAD
+    const m2 = {
+      message: "official",
+      userId: friend.userId,
       conversationId: id,
       sentBy: user.id,
-    },
-  ];
+    };
 
-  if (friend) {
+    if (
+      messageCount2.count === 0 ||
+      functions.isToday(lastmessage1[0].createdAt)
+=======
+    if (
+      messageCount2.count === 0 ||
+      functions.isToday(lastmessage2[0].createdAt)
+>>>>>>> eabfdb2f9307bd7f372829c20ba35c130ad55c8e
+    ) {
+      messages.push(m2);
+    }
     messages.push({
       message,
       userId: friend.userId,
@@ -103,8 +206,6 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       },
       { where: { friendId: friend.id } }
     );
-  } else {
-    errorHandler.notFound("Friend");
   }
 
   await Friend.update(
@@ -125,7 +226,6 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       time,
       message,
       id,
-      type: false,
       sentBy: username,
     },
   });
@@ -136,12 +236,9 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       time,
       message,
       to: friendUsername.username,
-      type: false,
       sentBy: username,
     },
   });
-
-  const { type } = newMessage[0];
 
   return { message, sentBy: username, time };
 };
@@ -259,6 +356,15 @@ exports.deleteChat = async function (_, { id }, context) {
     errorHandler.notFound("Conversation");
   }
 
+  await Friend.update(
+    {
+      lastmessage: "",
+    },
+    {
+      where: { userId: user.id, conversationId: id },
+    }
+  );
+
   await DirectMessage.destroy({
     where: {
       conversationId: id,
@@ -291,6 +397,7 @@ exports.directMessages = async function (_, { id }, context) {
       userId: user.id,
       conversationId: id,
     },
+    order: [["createdAt", "ASC"]],
   });
 
   if (!messages) {

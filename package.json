@@ -4,7 +4,8 @@
   "description": "JustChat is a group and private chat built with Node/Express, GraphQL, and PostgreSQL.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node index.js",
+    "start:dev": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^5.3.0",
-    "apollo-server": "^2.18.2",
+    "apollo-server-express": "^2.19.0",
     "bcrypt": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",

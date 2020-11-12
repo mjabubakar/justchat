@@ -1,6 +1,5 @@
-const { AuthenticationError } = require("apollo-server");
+const { AuthenticationError } = require("apollo-server-express");
 const jwt = require("jsonwebtoken");
-const { User } = require("./models");
 
 module.exports = async ({ req, connection }) => {
   if (connection) return connection.context;

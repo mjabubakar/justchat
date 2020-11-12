@@ -4,6 +4,7 @@ type User {
     fullname: String!
     username: String!
     message: String!
+    bio: String
 }  
 
 input UserInputData {
@@ -12,6 +13,7 @@ input UserInputData {
     username: String!
     password: String!
     profilepic: Upload!
+    bio: String
 }
 
 type Users {
@@ -28,13 +30,6 @@ type userData {
     bio: String
     profilepic: String!
 }
-
-type Image {
-    filename: String!
-    mimetype: String!
-    encoding: String!
-    url: String!
-  }
 `;
 
 exports.mutations = `
