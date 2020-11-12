@@ -75,6 +75,17 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     errorHandler.notFound("Conversation");
   }
 
+  const me = await Friend.findOne({
+    where: {
+      conversationId: conversation.id,
+      userId: user.id,
+    },
+  });
+
+  if (!me) {
+    errorHandler.notFound("Friend");
+  }
+
   const friend = await Friend.findOne({
     where: {
       conversationId: conversation.id,
@@ -86,21 +97,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     where: { conversationId: id, userId: user.id },
   });
 
-  const messageCount2 = await DirectMessage.findAndCountAll({
-    where: { conversationId: id, userId: friend.id },
-  });
-
-  const lastmessage1 = await DirectMessage.findAll({
-    where: { conversationId: id, userId: user.id },
-    limit: 1,
-    order: [["createdAt", "DESC"]],
-  });
-
-  const lastmessage2 = await DirectMessage.findAll({
-    where: { conversationId: id, userId: friend.id },
-    limit: 1,
-    order: [["createdAt", "DESC"]],
-  });
+  const lastmessage1 = messageCount1.rows;
 
   const messages = [];
   const m1 = {
@@ -122,18 +119,23 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     conversationId: id,
     sentBy: user.id,
   });
-  const m2 = {
-    message: "official",
-    userId: friend.userId,
-    conversationId: id,
-    sentBy: user.id,
-  };
   if (friend) {
+    const messageCount2 = await DirectMessage.findAndCountAll({
+      where: { conversationId: id, userId: friend.userId },
+    });
+
+    const lastmessage2 = messageCount2.rows;
+
     if (
       messageCount2.count === 0 ||
       functions.isToday(lastmessage2[0].createdAt)
     ) {
-      messages.push(m2);
+      messages.push({
+        message: "official",
+        userId: friend.userId,
+        conversationId: id,
+        sentBy: user.id,
+      });
     }
     messages.push({
       message,
@@ -148,10 +150,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       },
       { where: { friendId: friend.id } }
     );
-  } else {
-    errorHandler.notFound("Friend");
   }
-
   await Friend.update(
     {
       lastmessage: message,
@@ -185,8 +184,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   });
 
   return { message, sentBy: username, time };
-};
-
+}
 exports.friends = async function (_, __, context) {
   if (!context.username) {
     errorHandler.authenticationError();

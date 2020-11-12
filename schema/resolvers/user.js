@@ -15,7 +15,9 @@ exports.createUser = async function (_, { userInput }) {
   const errors = [];
 
   if (!validator.isEmail(email)) {
-    errors.push({ message: "Email is invalid" });
+    const error = new Error("Invalid email address");
+    error.code = 422;
+    throw error;
   }
 
   if (!functions.isAlpha(fullname)) {
@@ -90,7 +92,7 @@ exports.createUser = async function (_, { userInput }) {
   }
 
   const user = User.build({
-    email,
+    email: email.toLocaleLowerCase(),
     password: hashedPass,
     fullname,
     username,
@@ -213,7 +215,9 @@ exports.updateEmail = async function (_, { newEmail }, context) {
 };
 
 exports.login = async function (_, { email, password }) {
-  const user = await User.findOne({ where: { email } });
+  const user = await User.findOne({
+    where: { email: email.toLocaleLowerCase() },
+  });
 
   if (!user) {
     errorHandler.isInCorrect();

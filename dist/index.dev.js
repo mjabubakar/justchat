@@ -29,9 +29,7 @@ var corsOptions = {
   origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200
 };
-app.use(cors({
-  corsOptions: corsOptions
-}));
+app.use(cors());
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,

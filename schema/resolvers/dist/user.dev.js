@@ -26,7 +26,7 @@ var _require2 = require("../../gcloud"),
 var name = new Date().getTime().toString();
 
 exports.createUser = function _callee(_, _ref) {
-  var userInput, email, password, username, fullname, profilepic, bio, errors, error, userExist, usernameExist, _error, hashedPass, _ref2, createReadStream, _error2, user, createdUser, confirmationToken;
+  var userInput, email, password, username, fullname, profilepic, bio, errors, error, _error, userExist, usernameExist, _error2, hashedPass, _ref2, createReadStream, _error3, user, createdUser, confirmationToken;
 
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -36,12 +36,16 @@ exports.createUser = function _callee(_, _ref) {
           email = userInput.email, password = userInput.password, username = userInput.username, fullname = userInput.fullname, profilepic = userInput.profilepic, bio = userInput.bio;
           errors = [];
 
-          if (!validator.isEmail(email)) {
-            errors.push({
-              message: "Email is invalid"
-            });
+          if (validator.isEmail(email)) {
+            _context.next = 7;
+            break;
           }
 
+          error = new Error("Invalid email address");
+          error.code = 422;
+          throw error;
+
+        case 7:
           if (!functions.isAlpha(fullname)) {
             errors.push({
               message: "Fullname must be alphabet"
@@ -81,58 +85,58 @@ exports.createUser = function _callee(_, _ref) {
           }
 
           if (!(errors.length > 0)) {
-            _context.next = 14;
+            _context.next = 17;
             break;
           }
 
-          error = new Error(errors);
-          error.data = errors;
-          error.code = 422;
-          throw error;
+          _error = new Error(errors);
+          _error.data = errors;
+          _error.code = 422;
+          throw _error;
 
-        case 14:
-          _context.next = 16;
+        case 17:
+          _context.next = 19;
           return regeneratorRuntime.awrap(User.findOne({
             where: {
               email: email.toLowerCase()
             }
           }));
 
-        case 16:
+        case 19:
           userExist = _context.sent;
-          _context.next = 19;
+          _context.next = 22;
           return regeneratorRuntime.awrap(User.findOne({
             where: {
               username: username.toLocaleLowerCase()
             }
           }));
 
-        case 19:
+        case 22:
           usernameExist = _context.sent;
 
           if (!(userExist || usernameExist)) {
-            _context.next = 24;
+            _context.next = 27;
             break;
           }
 
-          _error = new Error("".concat(userExist ? "Email" : "Username", " taken already!"));
-          _error.code = 409;
-          throw _error;
+          _error2 = new Error("".concat(userExist ? "Email" : "Username", " taken already!"));
+          _error2.code = 409;
+          throw _error2;
 
-        case 24:
-          _context.next = 26;
+        case 27:
+          _context.next = 29;
           return regeneratorRuntime.awrap(bcrypt.hash(password, 12));
 
-        case 26:
+        case 29:
           hashedPass = _context.sent;
-          _context.next = 29;
+          _context.next = 32;
           return regeneratorRuntime.awrap(profilepic);
 
-        case 29:
+        case 32:
           _ref2 = _context.sent;
           createReadStream = _ref2.createReadStream;
-          _context.prev = 31;
-          _context.next = 34;
+          _context.prev = 34;
+          _context.next = 37;
           return regeneratorRuntime.awrap(new Promise(function (res) {
             return createReadStream().pipe(bucket.file("".concat(username, "/").concat(name)).createWriteStream({
               resumable: false,
@@ -140,20 +144,20 @@ exports.createUser = function _callee(_, _ref) {
             })).on("finish", res);
           }));
 
-        case 34:
-          _context.next = 41;
+        case 37:
+          _context.next = 44;
           break;
 
-        case 36:
-          _context.prev = 36;
-          _context.t0 = _context["catch"](31);
-          _error2 = new Error("No image uploaded");
-          _error2.code = 422;
-          throw _error2;
+        case 39:
+          _context.prev = 39;
+          _context.t0 = _context["catch"](34);
+          _error3 = new Error("No image uploaded");
+          _error3.code = 422;
+          throw _error3;
 
-        case 41:
+        case 44:
           user = User.build({
-            email: email,
+            email: email.toLocaleLowerCase(),
             password: hashedPass,
             fullname: fullname,
             username: username,
@@ -162,10 +166,10 @@ exports.createUser = function _callee(_, _ref) {
             online: false,
             bio: bio
           });
-          _context.next = 44;
+          _context.next = 47;
           return regeneratorRuntime.awrap(user.save());
 
-        case 44:
+        case 47:
           createdUser = _context.sent;
           confirmationToken = data.emailConfirmation(user.username, user.email);
           functions.nodemailer(confirmationToken, user.email);
@@ -176,12 +180,12 @@ exports.createUser = function _callee(_, _ref) {
             bio: createdUser.bio
           });
 
-        case 48:
+        case 51:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[31, 36]]);
+  }, null, null, [[34, 39]]);
 };
 
 exports.allUsers = function _callee2(_, __, context) {
@@ -383,7 +387,7 @@ exports.login = function _callee6(_, _ref5) {
           _context6.next = 3;
           return regeneratorRuntime.awrap(User.findOne({
             where: {
-              email: email
+              email: email.toLocaleLowerCase()
             }
           }));
 
@@ -470,7 +474,7 @@ exports.deleteUser = function _callee7(_, _ref6, context) {
 };
 
 exports.updateUser = function _callee8(_, _ref7, context) {
-  var bio, about, fullname, username, user, errors, error, _error3, checkUsername, _error4;
+  var bio, about, fullname, username, user, errors, error, _error4, checkUsername, _error5;
 
   return regeneratorRuntime.async(function _callee8$(_context8) {
     while (1) {
@@ -531,10 +535,10 @@ exports.updateUser = function _callee8(_, _ref7, context) {
             break;
           }
 
-          _error3 = new Error("Invalid input.");
-          _error3.data = errors;
-          _error3.code = 422;
-          throw _error3;
+          _error4 = new Error("Invalid input.");
+          _error4.data = errors;
+          _error4.code = 422;
+          throw _error4;
 
         case 18:
           _context8.next = 20;
@@ -552,9 +556,9 @@ exports.updateUser = function _callee8(_, _ref7, context) {
             break;
           }
 
-          _error4 = new Error("Username already exist");
-          _error4.code = 409;
-          throw _error4;
+          _error5 = new Error("Username already exist");
+          _error5.code = 409;
+          throw _error5;
 
         case 25:
           _context8.next = 27;
