@@ -2,8 +2,6 @@ const errorHandler = require("../../ErrorHandler");
 const { User, Group, GroupMember, GroupMessage } = require("../../models");
 const functions = require("../../functions");
 const validator = require("validator");
-const { createWriteStream } = require("fs");
-const path = require("path");
 const { pubsub } = require("./pubsub");
 const MESSAGE_SENT = "MESSAGE_SENT";
 
@@ -164,13 +162,25 @@ exports.changeGProfilePic = async (_, { file, id }, context) => {
     errorHandler.notAuthorized();
   }
 
-  const { createReadStream, filename } = await file;
+  const { createReadStream } = await file;
+  const name = new Date().getTime().toString();
 
-  await new Promise((res) =>
-    createReadStream()
-      .pipe(createWriteStream(path.join(__dirname, "../images", filename)))
-      .on("close", res)
-  );
+  try {
+    await new Promise((res) =>
+      createReadStream()
+        .pipe(
+          bucket.file(`${id}/${name}`).createWriteStream({
+            resumable: false,
+            gzip: true,
+          })
+        )
+        .on("finish", res)
+    );
+  } catch (e) {
+    const error = new Error("No image uploaded");
+    error.code = 422;
+    throw error;
+  }
 
   await Group.update(
     {
@@ -421,11 +431,7 @@ exports.updateType = async function (_, { groupId, username }, context) {
   }`;
 };
 
-exports.createGroup = async function (
-  _,
-  { name, profilepic, members },
-  context
-) {
+exports.createGroup = async function (_, { name, members }, context) {
   if (!context.username) {
     errorHandler.authenticationError();
   }
@@ -438,7 +444,7 @@ exports.createGroup = async function (
 
   const errors = [];
 
-  if (validator.isEmpty(name) || validator.isEmpty(profilepic)) {
+  if (validator.isEmpty(name)) {
     errors.push({ message: "All fields are required" });
   }
 
@@ -455,7 +461,7 @@ exports.createGroup = async function (
 
   const group = Group.build({
     name,
-    profilepic,
+    profilepic: "",
     userId: user.id,
     lastmessage: "Group created",
   });

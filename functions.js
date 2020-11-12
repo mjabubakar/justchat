@@ -81,7 +81,7 @@ exports.nodemailer = (confirmationToken, email) => {
     })
   );
 
-  const url = `http://localhost:${process.env.PORT}/confirmation/${confirmationToken}`;
+  const url = `${process.env.FRONT_END_URL}/confirmation/${confirmationToken}`;
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS, //env
     to: email,
@@ -106,7 +106,7 @@ exports.forgotPassword = (confirmationToken, email) => {
     })
   );
 
-  const url = `http://localhost:${process.env.PORT}/confirmation/${confirmationToken}`;
+  const url = `${process.env.FRONT_END_URL}/confirmation/${confirmationToken}`;
   const mailOptions = {
     from: process.env.EMAIL_ADDRESS,
     to: email,
@@ -141,4 +141,26 @@ exports.convertToTime = function convertToTime(createdAt) {
   }
 
   return hours + ":" + minutes + " " + time;
+};
+
+exports.isToday = function isToday(t) {
+  const date = new Date(t);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  let minutes = date.getMinutes();
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+
+  let currentDate = new Date();
+  if (
+    `${day}/${month}/${year}` ===
+    `${currentDate.getDate()}/${
+      currentDate.getMonth() + 1
+    }/${currentDate.getFullYear()}`
+  ) {
+    return false;
+  }
+  return true;
 };
