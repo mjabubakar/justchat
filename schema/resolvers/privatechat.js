@@ -117,38 +117,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   };
   if (
     messageCount1.count === 0 ||
-    functions.isToday(lastmessage[0].createdAt)
-  ) {
-    messages.push(m1);
-  }
-  messages.push({
-    message,
-    userId: user.id,
-    conversationId: id,
-    sentBy: user.id,
-  });
-
-  if (!me) {
-    errorHandler.notFound("Friend");
-  }
-
-  const friend = await Friend.findOne({
-    where: {
-      conversationId: conversation.id,
-      userId: conversation.chatId - user.id,
-    },
-  });
-
-  const messages = [];
-  const m1 = {
-    message: "official",
-    userId: user.id,
-    conversationId: id,
-    sentBy: user.id,
-  };
-  if (
-    messageCount1.count === 0 ||
-    functions.isToday(lastmessage[0].createdAt)
+    functions.isToday(lastmessage1[0].createdAt)
   ) {
     messages.push(m1);
   }
@@ -168,7 +137,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     };
     if (
       messageCount2.count === 0 ||
-      functions.isToday(lastmessage1[0].createdAt)
+      functions.isToday(lastmessage2[0].createdAt)
     ) {
       messages.push(m2);
     }
