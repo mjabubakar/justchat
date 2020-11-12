@@ -42,5 +42,9 @@ Start server from your root folder using `npm start`
 - `EMAIL_CONFIRMATION_TOKEN_SECRET` JWT encryption secret for email confirmation.
 - `GCLOUD_PROJECT_ID` Google cloud project id
 - `GCLOUD_APPLICATION_CREDENTIALS` key.json path
+<<<<<<< HEAD
 - `GCLOUD_STORAGE_BUCKET_URL` Storage bucket url
 - `FRONT_END_URL` Website URL that will be used for email confirmation
+=======
+- `GCLOUD_STORAGE_BUCKET_URL` Storage bucket url
+>>>>>>> eabfdb2f9307bd7f372829c20ba35c130ad55c8e

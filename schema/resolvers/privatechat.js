@@ -96,6 +96,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   const messageCount1 = await DirectMessage.findAndCountAll({
     where: { conversationId: id, userId: user.id },
 <<<<<<< HEAD
+<<<<<<< HEAD
     limit: 1,
     order: [["createdAt", "DESC"]],
   });
@@ -141,6 +142,20 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     order: [["createdAt", "DESC"]],
   });
 
+=======
+  });
+
+  const messageCount2 = await DirectMessage.findAndCountAll({
+    where: { conversationId: id, userId: friend.id },
+  });
+
+  const lastmessage1 = await DirectMessage.findAll({
+    where: { conversationId: id, userId: user.id },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
+  });
+
+>>>>>>> eabfdb2f9307bd7f372829c20ba35c130ad55c8e
   const lastmessage2 = await DirectMessage.findAll({
     where: { conversationId: id, userId: friend.id },
     limit: 1,
@@ -175,6 +190,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   };
   if (friend) {
 <<<<<<< HEAD
+<<<<<<< HEAD
     const m2 = {
       message: "official",
       userId: friend.userId,
@@ -185,6 +201,11 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     if (
       messageCount2.count === 0 ||
       functions.isToday(lastmessage1[0].createdAt)
+=======
+    if (
+      messageCount2.count === 0 ||
+      functions.isToday(lastmessage2[0].createdAt)
+>>>>>>> eabfdb2f9307bd7f372829c20ba35c130ad55c8e
 =======
     if (
       messageCount2.count === 0 ||
