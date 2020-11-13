@@ -78,7 +78,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   const me = await Friend.findOne({
     where: {
       conversationId: conversation.id,
-      userId: user.id,
+      friendId: user.id,
     },
   });
 
@@ -95,16 +95,24 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
 
   const messageCount1 = await DirectMessage.findAndCountAll({
     where: { conversationId: id, userId: user.id },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
   });
 
+  const messageCount2 = await DirectMessage.findAndCountAll({
+    where: { conversationId: id, userId: friend.userId },
+    limit: 1,
+    order: [["createdAt", "DESC"]],
+  });
   const lastmessage1 = messageCount1.rows;
+
+  const lastmessage2 = messageCount2.rows;
 
   const messages = [];
   const m1 = {
     message: "official",
     userId: user.id,
     conversationId: id,
-
     sentBy: user.id,
   };
   if (
@@ -119,23 +127,19 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
     conversationId: id,
     sentBy: user.id,
   });
+
   if (friend) {
-    const messageCount2 = await DirectMessage.findAndCountAll({
-      where: { conversationId: id, userId: friend.userId },
-    });
-
-    const lastmessage2 = messageCount2.rows;
-
+    const m2 = {
+      message: "official",
+      userId: friend.userId,
+      conversationId: id,
+      sentBy: user.id,
+    };
     if (
       messageCount2.count === 0 ||
       functions.isToday(lastmessage2[0].createdAt)
     ) {
-      messages.push({
-        message: "official",
-        userId: friend.userId,
-        conversationId: id,
-        sentBy: user.id,
-      });
+      messages.push(m2);
     }
     messages.push({
       message,
@@ -151,6 +155,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
       { where: { friendId: friend.id } }
     );
   }
+
   await Friend.update(
     {
       lastmessage: message,
@@ -184,7 +189,7 @@ exports.sendDirectMessage = async function (_, { id, message }, context) {
   });
 
   return { message, sentBy: username, time };
-}
+};
 exports.friends = async function (_, __, context) {
   if (!context.username) {
     errorHandler.authenticationError();
@@ -214,9 +219,7 @@ exports.friends = async function (_, __, context) {
     data.conversationId = friend.conversationId;
     data.lastmessage = friend.lastmessage;
     data.count = count.count;
-    data.lastmsgTime = friend.lastmessage
-      ? functions.lastmsgTime(friend.updatedAt)
-      : "";
+    data.lastmsgTime = friend.lastmessage ? friend.updatedAt : "";
     allFriends.push(data);
   }
 

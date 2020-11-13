@@ -89,7 +89,7 @@ exports.setCount = function _callee(_, _ref, context) {
 };
 
 exports.sendDirectMessage = function _callee2(_, _ref2, context) {
-  var id, message, user, conversation, me, friend, messageCount1, lastmessage1, messages, m1, messageCount2, lastmessage2, count, newMessage, time, _ref3, username, friendUsername;
+  var id, message, user, conversation, me, friend, messageCount1, messageCount2, lastmessage1, lastmessage2, messages, m1, m2, count, newMessage, time, _ref3, username, friendUsername;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
@@ -133,7 +133,7 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
           return regeneratorRuntime.awrap(Friend.findOne({
             where: {
               conversationId: conversation.id,
-              userId: user.id
+              friendId: user.id
             }
           }));
 
@@ -159,12 +159,27 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
             where: {
               conversationId: id,
               userId: user.id
-            }
+            },
+            limit: 1,
+            order: [["createdAt", "DESC"]]
           }));
 
         case 19:
           messageCount1 = _context2.sent;
+          _context2.next = 22;
+          return regeneratorRuntime.awrap(DirectMessage.findAndCountAll({
+            where: {
+              conversationId: id,
+              userId: friend.userId
+            },
+            limit: 1,
+            order: [["createdAt", "DESC"]]
+          }));
+
+        case 22:
+          messageCount2 = _context2.sent;
           lastmessage1 = messageCount1.rows;
+          lastmessage2 = messageCount2.rows;
           messages = [];
           m1 = {
             message: "official",
@@ -185,29 +200,19 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
           });
 
           if (!friend) {
-            _context2.next = 37;
+            _context2.next = 38;
             break;
           }
 
-          _context2.next = 28;
-          return regeneratorRuntime.awrap(DirectMessage.findAndCountAll({
-            where: {
-              conversationId: id,
-              userId: friend.userId
-            }
-          }));
-
-        case 28:
-          messageCount2 = _context2.sent;
-          lastmessage2 = messageCount2.rows;
+          m2 = {
+            message: "official",
+            userId: friend.userId,
+            conversationId: id,
+            sentBy: user.id
+          };
 
           if (messageCount2.count === 0 || functions.isToday(lastmessage2[0].createdAt)) {
-            messages.push({
-              message: "official",
-              userId: friend.userId,
-              conversationId: id,
-              sentBy: user.id
-            });
+            messages.push(m2);
           }
 
           messages.push({
@@ -216,16 +221,16 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
             conversationId: id,
             sentBy: user.id
           });
-          _context2.next = 34;
+          _context2.next = 35;
           return regeneratorRuntime.awrap(Count.findOne({
             where: {
               friendId: friend.id
             }
           }));
 
-        case 34:
+        case 35:
           count = _context2.sent;
-          _context2.next = 37;
+          _context2.next = 38;
           return regeneratorRuntime.awrap(Count.update({
             count: count.count + 1
           }, {
@@ -234,8 +239,8 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
             }
           }));
 
-        case 37:
-          _context2.next = 39;
+        case 38:
+          _context2.next = 40;
           return regeneratorRuntime.awrap(Friend.update({
             lastmessage: message
           }, {
@@ -244,20 +249,20 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
             }
           }));
 
-        case 39:
-          _context2.next = 41;
+        case 40:
+          _context2.next = 42;
           return regeneratorRuntime.awrap(DirectMessage.bulkCreate(messages));
 
-        case 41:
+        case 42:
           newMessage = _context2.sent;
           time = functions.convertToTime(newMessage[0].createdAt);
-          _context2.next = 45;
+          _context2.next = 46;
           return regeneratorRuntime.awrap(User.findByPk(newMessage[0].sentBy));
 
-        case 45:
+        case 46:
           _ref3 = _context2.sent;
           username = _ref3.username;
-          _context2.next = 49;
+          _context2.next = 50;
           return regeneratorRuntime.awrap(pubsub.publish(PRIVATE_MESSAGE_SENT, {
             directMessageSent: {
               time: time,
@@ -267,13 +272,13 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
             }
           }));
 
-        case 49:
-          _context2.next = 51;
+        case 50:
+          _context2.next = 52;
           return regeneratorRuntime.awrap(User.findByPk(friend.userId));
 
-        case 51:
+        case 52:
           friendUsername = _context2.sent;
-          _context2.next = 54;
+          _context2.next = 55;
           return regeneratorRuntime.awrap(pubsub.publish(ALL_MESSAGES, {
             directMessages: {
               time: time,
@@ -283,14 +288,14 @@ exports.sendDirectMessage = function _callee2(_, _ref2, context) {
             }
           }));
 
-        case 54:
+        case 55:
           return _context2.abrupt("return", {
             message: message,
             sentBy: username,
             time: time
           });
 
-        case 55:
+        case 56:
         case "end":
           return _context2.stop();
       }
@@ -371,7 +376,7 @@ exports.friends = function _callee3(_, __, context) {
           data.conversationId = friend.conversationId;
           data.lastmessage = friend.lastmessage;
           data.count = count.count;
-          data.lastmsgTime = friend.lastmessage ? functions.lastmsgTime(friend.updatedAt) : "";
+          data.lastmsgTime = friend.lastmessage ? friend.updatedAt : "";
           allFriends.push(data);
 
         case 29:

@@ -7,8 +7,6 @@ var express = require("express");
 
 var app = express();
 
-var cors = require("cors");
-
 var http = require("http");
 
 require("dotenv/config");
@@ -29,9 +27,6 @@ var corsOptions = {
   origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200
 };
-app.use(cors({
-  corsOptions: corsOptions
-}));
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
@@ -57,7 +52,7 @@ var server = new ApolloServer({
 });
 server.applyMiddleware({
   app: app,
-  cors: false
+  cors: corsOptions
 });
 var httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);

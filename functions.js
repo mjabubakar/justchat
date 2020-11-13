@@ -124,7 +124,7 @@ exports.forgotPassword = (confirmationToken, email) => {
 
 exports.convertToTime = function convertToTime(createdAt) {
   const date = new Date(createdAt);
-  let hours = date.getHours();
+  let hours = date.getHours() + 1;
   let time = "AM";
   let minutes = date.getMinutes();
 
