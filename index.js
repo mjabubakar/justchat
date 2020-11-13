@@ -1,7 +1,6 @@
 const { ApolloServer } = require("apollo-server-express");
 const express = require("express");
 const app = express();
-const cors = require("cors");
 const http = require("http");
 require("dotenv/config");
 
@@ -11,7 +10,10 @@ const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONT_END_URL,
+  optionsSuccessStatus: 200,
+};
 
 const server = new ApolloServer({
   context,
@@ -25,7 +27,7 @@ const server = new ApolloServer({
     if (!err.originalError) {
       return err;
     }
-
+ 
     const { data } = err.originalError;
     const message = err.message || "An error occured. Try again.";
     const code = err.originalError.code || 500;
@@ -33,7 +35,7 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app, cors: false });
+server.applyMiddleware({ app, cors: corsOptions });
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
