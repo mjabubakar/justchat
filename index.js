@@ -11,12 +11,12 @@ const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
 
-const corsOptions = {
-  origin: process.env.FRONT_END_URL,
-  optionsSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: process.env.FRONT_END_URL,
+    optionsSuccessStatus: 200,
+  })
+);
 
 const server = new ApolloServer({
   context,
@@ -30,7 +30,7 @@ const server = new ApolloServer({
     if (!err.originalError) {
       return err;
     }
- 
+
     const { data } = err.originalError;
     const message = err.message || "An error occured. Try again.";
     const code = err.originalError.code || 500;

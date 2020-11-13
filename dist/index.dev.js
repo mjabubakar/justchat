@@ -25,11 +25,10 @@ var _require2 = require("./subscription"),
     onConnect = _require2.onConnect,
     onDisconnect = _require2.onDisconnect;
 
-var corsOptions = {
+app.use(cors({
   origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+}));
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
