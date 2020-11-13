@@ -219,9 +219,7 @@ exports.friends = async function (_, __, context) {
     data.conversationId = friend.conversationId;
     data.lastmessage = friend.lastmessage;
     data.count = count.count;
-    data.lastmsgTime = friend.lastmessage
-      ? functions.lastmsgTime(friend.updatedAt)
-      : "";
+    data.lastmsgTime = friend.lastmessage ? friend.updatedAt : "";
     allFriends.push(data);
   }
 
