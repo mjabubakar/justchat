@@ -30,7 +30,7 @@ const server = new ApolloServer({
     if (!err.originalError) {
       return err;
     }
-
+ 
     const { data } = err.originalError;
     const message = err.message || "An error occured. Try again.";
     const code = err.originalError.code || 500;
