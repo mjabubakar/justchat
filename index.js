@@ -11,12 +11,7 @@ const typeDefs = require("./schema/typeDefs");
 const resolvers = require("./schema/resolvers");
 const { onConnect, onDisconnect } = require("./subscription");
 
-app.use(
-  cors({
-    origin: process.env.FRONT_END_URL,
-    optionsSuccessStatus: 200,
-  })
-);
+app.use(cors());
 
 const server = new ApolloServer({
   context,
