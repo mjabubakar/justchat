@@ -1,7 +1,6 @@
 const { ApolloServer } = require("apollo-server-express");
 const express = require("express");
 const app = express();
-const cors = require("cors");
 const http = require("http");
 require("dotenv/config");
 
@@ -15,8 +14,6 @@ const corsOptions = {
   origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200,
 };
-
-app.use(cors());
 
 const server = new ApolloServer({
   context,

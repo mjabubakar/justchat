@@ -7,8 +7,6 @@ var express = require("express");
 
 var app = express();
 
-var cors = require("cors");
-
 var http = require("http");
 
 require("dotenv/config");
@@ -29,7 +27,6 @@ var corsOptions = {
   origin: process.env.FRONT_END_URL,
   optionsSuccessStatus: 200
 };
-app.use(cors());
 var server = new ApolloServer({
   context: context,
   typeDefs: typeDefs,
