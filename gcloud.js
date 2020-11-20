@@ -1,5 +1,4 @@
 const { Storage } = require("@google-cloud/storage");
-const path = require("path");
 
 const gc = new Storage({
   keyFilename: process.env.GCLOUD_APPLICATION_CREDENTIALS,
