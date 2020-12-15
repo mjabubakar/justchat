@@ -1,25 +1,27 @@
 "use strict";
 
-var _require = require("apollo-server-express"),
+var _require = require('apollo-server-express'),
     ApolloServer = _require.ApolloServer;
 
-var express = require("express");
+var express = require('express');
 
 var app = express();
 
-var http = require("http");
+var http = require('http');
 
-require("dotenv/config");
+require('dotenv/config');
+
+var gcloud = require('./gcloudscript');
 
 var port = process.env.PORT || 3000;
 
-var context = require("./context");
+var context = require('./context');
 
-var typeDefs = require("./schema/typeDefs");
+var typeDefs = require('./schema/typeDefs');
 
-var resolvers = require("./schema/resolvers");
+var resolvers = require('./schema/resolvers');
 
-var _require2 = require("./subscription"),
+var _require2 = require('./subscription'),
     onConnect = _require2.onConnect,
     onDisconnect = _require2.onDisconnect;
 
@@ -41,7 +43,7 @@ var server = new ApolloServer({
     }
 
     var data = err.originalError.data;
-    var message = err.message || "An error occured. Try again.";
+    var message = err.message || 'An error occured. Try again.';
     var code = err.originalError.code || 500;
     return {
       message: message,
