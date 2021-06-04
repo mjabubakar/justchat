@@ -7,7 +7,10 @@ module.exports = {
     host: process.env.DB_HOST,
     dialect: "postgres", //mysql
     dialectOptions: {
-      ssl: true,
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
     },
   },
   production: {
@@ -18,7 +21,10 @@ module.exports = {
     dialect: "postgres", //mysql
     use_env_variable: "DATABASE_URL",
     dialectOptions: {
-      ssl: true,
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
     },
   },
 };
